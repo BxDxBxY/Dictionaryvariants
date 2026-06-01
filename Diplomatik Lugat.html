@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Diplomatik Lug‘at — Redesign</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script src="data.js"></script>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel" src="ornaments.jsx"></script>
+  <script type="text/babel" src="pages.jsx"></script>
+  <script type="text/babel" src="dictionary.jsx"></script>
+
+  <script type="text/babel" data-presets="env,react">
+    const { useEffect } = React;
+    const { useHashRoute, useAppPrefs, Topbar, Footer,
+            HomePage, AboutPage, ContactPage, TermsPage, PrivacyPage, NotFoundPage,
+            DictionaryPage, TermPage, navigate } = window.DL;
+
+    function App() {
+      const { path, params } = useHashRoute();
+      const prefs = useAppPrefs();
+      const { script } = prefs;
+
+      // Determine active nav
+      let activeNav = 'home';
+      let page;
+      if (path === '/' || path === '') {
+        activeNav = 'home';
+        page = <HomePage script={script}/>;
+      } else if (path === '/about') {
+        activeNav = 'about';
+        page = <AboutPage script={script}/>;
+      } else if (path === '/dictionary') {
+        activeNav = 'dictionary';
+        page = <DictionaryPage script={script} params={params}/>;
+      } else if (path.startsWith('/term/')) {
+        activeNav = 'dictionary';
+        const id = path.replace('/term/', '');
+        page = <TermPage script={script} id={id}/>;
+      } else if (path === '/contact') {
+        activeNav = 'contact';
+        page = <ContactPage script={script}/>;
+      } else if (path === '/terms') {
+        page = <TermsPage script={script}/>;
+      } else if (path === '/privacy') {
+        page = <PrivacyPage script={script}/>;
+      } else {
+        page = <NotFoundPage script={script}/>;
+      }
+
+      // Hide footer on dictionary (full-height two-pane layout)
+      const hideFooter = path === '/dictionary';
+
+      return (
+        <div className="app" data-screen-label={`${activeNav}`}>
+          <Topbar active={activeNav} prefs={prefs}/>
+          {page}
+          {!hideFooter && <Footer script={script}/>}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>
