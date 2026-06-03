@@ -63,8 +63,21 @@ function Icon({ name, size = 16 }) {
   return <svg {...common}>{paths[name]}</svg>;
 }
 
+function BrandLogo({ size = 52 }) {
+  return (
+    <img
+      src="logo2.png"
+      alt="UWED Diplomatik Akademiya"
+      className="brand-logo"
+      width={size}
+      height={size}
+      style={{ width: size, height: size }}
+    />
+  );
+}
+
 // ---------- Topbar ----------
-function Topbar({ active, prefs }) {
+function Topbar({ active, prefs, heroExpanded = false }) {
   const { theme, setTheme, script, setScript } = prefs;
   const t = (lat, cyr) => script === 'lat' ? lat : cyr;
   const items = [
@@ -75,16 +88,10 @@ function Topbar({ active, prefs }) {
   ];
 
   return (
-    <header className="topbar">
+    <header className={`topbar${heroExpanded ? ' topbar--hero-expanded' : ''}`}>
       <div className="topbar-inner">
         <a href="#/" className="brand" onClick={(e)=>{e.preventDefault();navigate('/');}}>
-          <svg width="36" height="36" viewBox="0 0 36 36" style={{flexShrink:0}}>
-            <circle cx="18" cy="18" r="17" fill="none" stroke="var(--accent)" strokeWidth="1"/>
-            <circle cx="18" cy="18" r="14" fill="none" stroke="var(--accent)" strokeWidth="0.6" opacity="0.5"/>
-            <rect x="10" y="10" width="16" height="16" fill="none" stroke="var(--accent-2)" strokeWidth="1"/>
-            <rect x="10" y="10" width="16" height="16" fill="none" stroke="var(--accent-2)" strokeWidth="1" transform="rotate(45 18 18)"/>
-            <circle cx="18" cy="18" r="2" fill="var(--accent-2)"/>
-          </svg>
+          <BrandLogo size={52}/>
           <div>
             <div className="brand-name">Diplomatik Lug‘at</div>
             <div className="brand-tag">UWED · Diplomatik Akademiya</div>
@@ -121,12 +128,7 @@ function Footer({ script }) {
       <div className="footer-inner">
         <div>
           <div className="brand" style={{ marginBottom: 16 }}>
-            <svg width="32" height="32" viewBox="0 0 36 36" style={{flexShrink:0}}>
-              <circle cx="18" cy="18" r="17" fill="none" stroke="var(--accent)" strokeWidth="1"/>
-              <rect x="10" y="10" width="16" height="16" fill="none" stroke="var(--accent-2)" strokeWidth="1"/>
-              <rect x="10" y="10" width="16" height="16" fill="none" stroke="var(--accent-2)" strokeWidth="1" transform="rotate(45 18 18)"/>
-              <circle cx="18" cy="18" r="2" fill="var(--accent-2)"/>
-            </svg>
+            <BrandLogo size={44}/>
             <div>
               <div className="brand-name">Diplomatik Lug‘at</div>
               <div className="brand-tag">UWED · 2024</div>
@@ -174,5 +176,5 @@ function Footer({ script }) {
 }
 
 window.DL = Object.assign(window.DL || {}, {
-  useHashRoute, navigate, useAppPrefs, Icon, Topbar, Footer
+  useHashRoute, navigate, useAppPrefs, Icon, BrandLogo, Topbar, Footer
 });

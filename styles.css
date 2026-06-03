@@ -3,29 +3,40 @@
    ============================================================ */
 
 :root {
-  /* Dark (default) */
-  --ink: #0e1419;
-  --ink-2: #141b22;
-  --ink-3: #1c242d;
-  --ink-4: #283340;
-  --line: #2a3441;
-  --line-2: #3a4654;
-  --paper: #e8e4dc;
-  --paper-dim: #c9c3b6;
-  --paper-mute: #8e8a82;
-  /* UWED institutional palette — Uzbek-flag blue + heraldic gold */
-  --uwed-blue: #1eb4d4;
-  --uwed-blue-deep: #0e6e8a;
-  --uwed-navy: #0a2540;
+  /* O'zbekiston davlat bayrog'i: moviy, yashil, oq, qizil */
+  --uz-sky: #0099b5;
+  --uz-sky-bright: #1eb5e0;
+  --uz-green: #1eb53a;
+  --uz-red: #ce1126;
+  --uz-white: #ffffff;
+  --uz-navy: #0a2540;
+
+  /* Dark (default) — moviy tusli fon */
+  --ink: #071820;
+  --ink-2: #0c2430;
+  --ink-3: #123040;
+  --ink-4: #1a3d52;
+  --line: #1e3d4f;
+  --line-2: #2a5068;
+  --paper: #eef6f8;
+  --paper-dim: #b8cdd6;
+  --paper-mute: #7a9aab;
+
+  /* UWED + bayroq uyg'unligi: moviy asos, oltin logotip */
+  --uwed-blue: var(--uz-sky);
+  --uwed-blue-deep: #007a94;
+  --uwed-navy: var(--uz-navy);
   --gold: #c89855;
   --gold-dim: #a87f44;
-  --brass: #c89855;
-  --brass-dim: #a87f44;
-  --accent: #1eb4d4;
-  --accent-2: #c89855;
-  --bukhara: #2e6b8e;
-  --bukhara-deep: #1c4561;
-  --terracotta: #b85a3c;
+  --brass: var(--gold);
+  --brass-dim: var(--gold-dim);
+  --accent: var(--uz-sky-bright);
+  --accent-2: var(--gold);
+  --bukhara: #1a5f7a;
+  --bukhara-deep: #0e3d52;
+  --terracotta: var(--uz-red);
+  --success: var(--uz-green);
+
   --bg: var(--ink);
   --bg-2: var(--ink-2);
   --bg-3: var(--ink-3);
@@ -34,28 +45,30 @@
   --fg-mute: var(--paper-mute);
   --border: var(--line);
   --border-strong: var(--line-2);
+  --map-filter: none;
 }
 
 [data-theme="light"] {
-  --bg: #f7f5f0;
+  --bg: #f4f9fb;
   --bg-2: #ffffff;
-  --bg-3: #efece5;
-  --fg: #15191f;
-  --fg-dim: #3d4651;
-  --fg-mute: #6b7280;
-  --border: #e3dfd5;
-  --border-strong: #cfcabd;
-  --accent: #0e6e8a;
-  --accent-2: #8a6726;
+  --bg-3: #e8f2f6;
+  --fg: var(--uz-navy);
+  --fg-dim: #2a4a5e;
+  --fg-mute: #5a7a8c;
+  --border: #cfe0e8;
+  --border-strong: #a8c5d4;
+  --accent: var(--uz-sky);
+  --accent-2: var(--gold-dim);
   --gold: #8a6726;
   --gold-dim: #6e521e;
-  --brass: #8a6726;
-  --brass-dim: #6e521e;
-  --uwed-blue: #0e6e8a;
-  --uwed-navy: #07223e;
-  --bukhara: #1c4561;
-  --bukhara-deep: #0e2a40;
-  --terracotta: #9a4a30;
+  --brass: var(--gold);
+  --brass-dim: var(--gold-dim);
+  --uwed-blue: var(--uz-sky);
+  --uwed-navy: var(--uz-navy);
+  --bukhara: #1a5f7a;
+  --bukhara-deep: #0e3d52;
+  --terracotta: #b32d3a;
+  --map-filter: none;
 }
 
 * { box-sizing: border-box; }
@@ -126,19 +139,130 @@ a { color: inherit; text-decoration: none; }
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in oklab, var(--bg) 85%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  min-height: 88px;
+  background-color: var(--bg);
+  background-image: url('mid-uzb2-min.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center 42%;
   border-bottom: 1px solid var(--border);
+  isolation: isolate;
 }
 
+/* Qorong'u qoplama — matn o'qilishi uchun (yorug' fon ustida) */
+.topbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(105deg,
+      rgba(30, 100, 144, 0.94) 0%,
+      rgba(43, 109, 131, 0.72) 42%,
+      rgba(22, 99, 26, 0.55) 68%,
+      rgba(22, 108, 29, 0.82) 100%),
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0.88) 100%);
+}
+
+.topbar::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 3px;
+  z-index: 2;
+  background: linear-gradient(90deg,
+    var(--uz-sky) 0%,
+    var(--uz-white) 35%,
+    var(--uz-green) 65%,
+    var(--uz-red) 100%);
+  opacity: 0.85;
+}
+
+/* .topbar--hero-expanded {
+  min-height: 172px;
+  background-position: center 28%;
+} */
+
+/* .topbar--hero-expanded .topbar-inner {
+  padding-top: 28px;
+  padding-bottom: 28px;
+  align-items: flex-end;
+} */
+
+/* .topbar--hero-expanded .brand-logo {
+  width: 58px;
+  height: 58px;
+} */
+
 .topbar-inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 32px;
-  padding: 14px 32px;
+  padding: 16px 32px;
   max-width: 1480px;
   margin: 0 auto;
+}
+
+.topbar .brand-name {
+  color: var(--uz-white);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.65);
+}
+.topbar .brand-tag {
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+.topbar .nav a {
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+.topbar .nav a:hover {
+  color: var(--uz-white);
+  background: rgba(0, 153, 181, 0.35);
+}
+.topbar .nav a.active {
+  color: var(--uz-white);
+}
+.topbar .nav a.active::after {
+  background: var(--uz-sky-bright);
+}
+.topbar .icon-btn {
+  color: var(--uz-white);
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(7, 24, 32, 0.45);
+  backdrop-filter: blur(6px);
+}
+.topbar .icon-btn:hover {
+  color: var(--uz-white);
+  border-color: var(--uz-sky-bright);
+  background: rgba(0, 153, 181, 0.4);
+}
+.topbar .script-toggle {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(7, 24, 32, 0.45);
+  backdrop-filter: blur(6px);
+}
+.topbar .script-toggle button {
+  color: rgba(255, 255, 255, 0.9);
+}
+.topbar .script-toggle button.on {
+  background: var(--uz-sky);
+  color: var(--uz-white);
+}
+
+.brand-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 3px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 }
 
 .brand {
@@ -256,6 +380,20 @@ a { color: inherit; text-decoration: none; }
   transition: all 0.18s;
 }
 .btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.is-saved {
+  border-color: var(--uz-green);
+  color: var(--uz-green);
+  background: rgba(30, 181, 58, 0.12);
+}
+.btn.is-speaking {
+  border-color: var(--uz-sky-bright);
+  color: var(--uz-sky-bright);
+  animation: pulse-speak 1s ease infinite;
+}
+@keyframes pulse-speak {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
 .btn-primary {
   background: var(--accent);
   border-color: var(--accent);
@@ -264,6 +402,27 @@ a { color: inherit; text-decoration: none; }
 .btn-primary:hover {
   background: transparent;
   color: var(--accent);
+}
+.toast-msg {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  padding: 12px 20px;
+  background: var(--ink-3);
+  border: 1px solid var(--uz-sky);
+  color: var(--fg);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  animation: toast-in 0.25s ease;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 /* ---------- Footer ---------- */
@@ -434,6 +593,26 @@ a { color: inherit; text-decoration: none; }
   transition: all 0.15s;
 }
 .audio-btn:hover { border-color: var(--accent); color: var(--accent); }
+.audio-btn.is-speaking {
+  border-color: var(--uz-sky-bright);
+  color: var(--uz-sky-bright);
+  background: rgba(0, 153, 181, 0.15);
+}
+
+.entry-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.entry-crumbs a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.entry-crumbs a:hover {
+  color: var(--accent-2);
+}
 .word-card-def {
   font-size: 19px;
   line-height: 1.55;
@@ -871,7 +1050,7 @@ a { color: inherit; text-decoration: none; }
 }
 .hero h1 em {
   font-style: italic;
-  color: var(--accent);
+  color: var(--uz-sky-bright);
   font-weight: 400;
 }
 .hero-sub {
@@ -940,6 +1119,39 @@ a { color: inherit; text-decoration: none; }
   opacity: 0.85;
 }
 .tile-band.thin { height: 22px; background-size: 44px 22px; opacity: 0.5; }
+
+/* Girih strip — home hero separator after search */
+.hero-separator {
+  /* max-width: 720px; */
+  margin: 40px 0 0;
+  border-radius: 2px;
+  opacity: 0.9;
+}
+.section-separator {
+  margin: 64px 0;
+  height: 36px;
+  opacity: 0.85;
+}
+
+.section-separator.tile-band {
+  width: 100%;
+}
+
+.ca-map-svg {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+}
+
+.ca-map-svg svg {
+  display: block;
+}
+
+.dict-list-item {
+  cursor: pointer;
+  user-select: none;
+}
 
 /* Suzani-inspired floral / radial ornament — used as a pause divider */
 .suzani-divider {

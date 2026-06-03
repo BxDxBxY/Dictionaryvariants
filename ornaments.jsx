@@ -1,7 +1,10 @@
-/* Central Asian ornamental SVG components */
-/* global React */
+﻿/* Central Asian ornamental SVG components */
+/* global React, d3, topojson */
+const { useRef, useEffect } = React;
 
-// 8-point star (Khorezm star) — fundamental CA tile motif
+const CA_COUNTRY_IDS = new Set(['860', '398', '417', '762', '795']);
+
+// 8-point star (Khorezm star) ΓÇö fundamental CA tile motif
 function StarOctagon({ size = 24, color = 'currentColor', stroke = 1.2, filled = false }) {
   const c = size / 2;
   const r = size / 2 - stroke;
@@ -13,7 +16,7 @@ function StarOctagon({ size = 24, color = 'currentColor', stroke = 1.2, filled =
   );
 }
 
-// Suzani-style radial medallion — embroidered floral abstraction
+// Suzani-style radial medallion ΓÇö embroidered floral abstraction
 function SuzaniMedallion({ size = 220, color = 'currentColor' }) {
   const c = size / 2;
   const petals = 8;
@@ -56,7 +59,7 @@ function SuzaniMedallion({ size = 220, color = 'currentColor' }) {
   );
 }
 
-// Girih lattice — geometric tile pattern (looks like Bukhara mosque tilework)
+// Girih lattice ΓÇö geometric tile pattern (looks like Bukhara mosque tilework)
 function GirihLattice({ width = 320, height = 80, color = 'currentColor' }) {
   const tiles = Math.ceil(width / 40);
   return (
@@ -76,7 +79,7 @@ function GirihLattice({ width = 320, height = 80, color = 'currentColor' }) {
   );
 }
 
-// Iwan arch — Persian/Central Asian portal arch frame
+// Iwan arch ΓÇö Persian/Central Asian portal arch frame
 function IwanArchFrame({ width = 460, height = 200, color = 'currentColor' }) {
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} fill="none" stroke={color} strokeWidth="1">
@@ -86,7 +89,7 @@ function IwanArchFrame({ width = 460, height = 200, color = 'currentColor' }) {
   );
 }
 
-// Calligraphic horizontal flourish — between sections
+// Calligraphic horizontal flourish ΓÇö between sections
 function Flourish({ width = 220, color = 'currentColor' }) {
   return (
     <svg width={width} height="14" viewBox={`0 0 220 14`} fill="none" stroke={color} strokeWidth="1" strokeLinecap="round">
@@ -114,36 +117,60 @@ function OrnateSectionHead({ children }) {
   );
 }
 
-// Central Asia map (CA-5 stylized)
-function CentralAsiaMap({ size = 360, color = 'currentColor' }) {
+// Central Asia map — world-atlas + d3 (CA-5 highlighted)
+function CentralAsiaMap({ size = 460 }) {
+  const wrapRef = useRef(null);
+  const height = Math.round(size * 0.65);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || typeof d3 === 'undefined' || typeof topojson === 'undefined') return;
+
+    el.innerHTML = '';
+    const root = getComputedStyle(document.documentElement);
+    const accent = root.getPropertyValue('--accent').trim() || '#c89855';
+    const accent2 = root.getPropertyValue('--accent-2').trim() || '#e8b56a';
+    const muted = root.getPropertyValue('--bg-3').trim() || '#1a1f28';
+    const border = root.getPropertyValue('--border').trim() || '#2a3140';
+
+    const svg = d3.select(el).append('svg')
+      .attr('viewBox', `0 0 ${size} ${height}`)
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .attr('role', 'img')
+      .attr('aria-label', 'Markaziy Osiyo xaritasi');
+
+    const projection = d3.geoMercator()
+      .center([67, 44])
+      .scale(size * 1.45)
+      .translate([size / 2, height / 2]);
+    const pathGen = d3.geoPath().projection(projection);
+
+    let cancelled = false;
+
+    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+      .then(r => r.json())
+      .then(world => {
+        if (cancelled) return;
+        const countries = topojson.feature(world, world.objects.countries);
+        svg.selectAll('path')
+          .data(countries.features)
+          .join('path')
+          .attr('d', pathGen)
+          .attr('fill', d => CA_COUNTRY_IDS.has(String(d.id)) ? accent : muted)
+          .attr('fill-opacity', d => CA_COUNTRY_IDS.has(String(d.id)) ? 0.85 : 0.4)
+          .attr('stroke', d => CA_COUNTRY_IDS.has(String(d.id)) ? accent2 : border)
+          .attr('stroke-width', d => CA_COUNTRY_IDS.has(String(d.id)) ? 1.3 : 0.35);
+      })
+      .catch(() => {
+        if (!cancelled) el.innerHTML = '<p style="padding:24px;color:var(--fg-mute);font-size:12px">Xarita yuklanmadi</p>';
+      });
+
+    return () => { cancelled = true; el.innerHTML = ''; };
+  }, [size, height]);
+
   return (
-    <svg viewBox="0 0 360 220" width={size} fill="none" stroke={color} strokeWidth="1" strokeLinejoin="round">
-      {/* Kazakhstan — large north */}
-      <path d="M 30 30 Q 80 10 160 18 Q 240 22 310 36 Q 340 40 348 60 Q 340 90 300 100 Q 260 96 230 110 Q 200 118 170 110 Q 140 100 100 110 Q 60 116 32 96 Q 18 70 30 30 Z" opacity="0.85"/>
-      {/* Uzbekistan — central */}
-      <path d="M 90 110 Q 130 102 170 112 Q 200 118 220 130 Q 230 142 220 152 Q 200 158 180 150 Q 150 144 120 150 Q 96 146 86 130 Z" fill={color} fillOpacity="0.18" stroke={color} strokeWidth="1.2"/>
-      {/* Turkmenistan — southwest */}
-      <path d="M 32 110 Q 62 116 92 132 Q 96 146 88 168 Q 60 184 40 178 Q 24 162 22 140 Q 22 124 32 110 Z" opacity="0.75"/>
-      {/* Tajikistan — southeast */}
-      <path d="M 200 152 Q 224 152 240 158 Q 252 168 250 178 Q 232 184 218 178 Q 206 168 200 152 Z" opacity="0.75"/>
-      {/* Kyrgyzstan — east */}
-      <path d="M 230 112 Q 260 110 290 116 Q 304 124 304 134 Q 280 144 260 142 Q 238 138 222 130 Z" opacity="0.75"/>
-      {/* Capital dots */}
-      <g fill={color} stroke="none">
-        <circle cx="150" cy="132" r="3"/>{/* Tashkent */}
-        <circle cx="190" cy="46" r="2.5"/>{/* Astana */}
-        <circle cx="270" cy="124" r="2.5"/>{/* Bishkek */}
-        <circle cx="232" cy="170" r="2.5"/>{/* Dushanbe */}
-        <circle cx="60" cy="148" r="2.5"/>{/* Ashgabat */}
-      </g>
-      <g fill={color} stroke="none" fontSize="9" fontFamily="JetBrains Mono, monospace" opacity="0.7">
-        <text x="156" y="128">TASHKENT</text>
-        <text x="196" y="42">ASTANA</text>
-        <text x="276" y="120">BISHKEK</text>
-        <text x="238" y="174">DUSHANBE</text>
-        <text x="14" y="160">ASHGABAT</text>
-      </g>
-    </svg>
+    <div ref={wrapRef} className="ca-map-svg" style={{ width: size, maxWidth: '100%', height }} />
   );
 }
 
