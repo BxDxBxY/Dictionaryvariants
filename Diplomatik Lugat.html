@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <div id="root"></div>
@@ -17,15 +17,19 @@
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 
   <script src="data.js"></script>
-  <script type="text/babel" src="chrome.jsx"></script>
-  <script type="text/babel" src="ornaments.jsx"></script>
-  <script type="text/babel" src="pages.jsx"></script>
-  <script type="text/babel" src="dictionary.jsx"></script>
+  <script src="api.js"></script>
+  <script src="actions.js"></script>
+  <script type="text/babel" src="chrome.jsx?v=4"></script>
+  <script type="text/babel" src="ornaments.jsx?v=4"></script>
+  <script type="text/babel" src="pages.jsx?v=4"></script>
+  <script type="text/babel" src="dictionary.jsx?v=4"></script>
 
   <script type="text/babel" data-presets="env,react">
-    const { useEffect } = React;
+    const { useEffect, useState } = React;
     const { useHashRoute, useAppPrefs, Topbar, Footer,
             HomePage, AboutPage, ContactPage, TermsPage, PrivacyPage, NotFoundPage,
             DictionaryPage, TermPage, navigate } = window.DL;
@@ -34,6 +38,45 @@
       const { path, params } = useHashRoute();
       const prefs = useAppPrefs();
       const { script } = prefs;
+      const [apiState, setApiState] = useState(window.DL_API_STATE || 'loading');
+      const isHome = path === '/' || path === '';
+      const [headerExpanded, setHeaderExpanded] = useState(true);
+
+      // api.js calls bootstrapAPI on load; sync React state when done
+      useEffect(() => {
+        if (window.DL_API_STATE !== 'loading') setApiState(window.DL_API_STATE);
+        const onReady = () => setApiState(window.DL_API_STATE);
+        window.addEventListener('dl:ready', onReady);
+        return () => window.removeEventListener('dl:ready', onReady);
+      }, []);
+
+      // Taller header on home when scrolled to top (shows more of photo)
+      useEffect(() => {
+        if (!isHome) {
+          setHeaderExpanded(false);
+          return;
+        }
+        const onScroll = () => setHeaderExpanded(window.scrollY < 56);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+      }, [isHome]);
+
+      // Loading screen while API is bootstrapping (~1300 terms from backend)
+      if (apiState === 'loading') {
+        return (
+          <div style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            height: '100vh', color: 'var(--accent)', fontSize: 18, padding: 24, textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 80, marginBottom: 24 }}>⏳</div>
+            <div>Yuklanmoqda...</div>
+            <div style={{ marginTop: 16, fontSize: 12, color: 'var(--fg-mute)', maxWidth: 420, lineHeight: 1.5 }}>
+              Backend: localhost:8000 · Sahifani HTTP orqali oching (fayl emas)
+            </div>
+          </div>
+        );
+      }
 
       // Determine active nav
       let activeNav = 'home';
@@ -67,7 +110,7 @@
 
       return (
         <div className="app" data-screen-label={`${activeNav}`}>
-          <Topbar active={activeNav} prefs={prefs}/>
+          <Topbar active={activeNav} prefs={prefs} heroExpanded={isHome && headerExpanded}/>
           {page}
           {!hideFooter && <Footer script={script}/>}
         </div>
